@@ -1,0 +1,15 @@
+# OUI override file for air
+# --------------------------
+# Format (one entry per line):
+#
+#   AA:BB:CC   Vendor Name
+#   AA:BB:CC = Vendor Name
+#   AA-BB-CC , Vendor Name
+#
+# Lines starting with `#` are ignored. The OUI must be the first 24 bits of
+# a MAC address (3 octets). Entries here take precedence over Scapy's
+# built-in IEEE database — useful for lab gear or known internal devices.
+#
+# Example:
+#   00:11:22   TestingHomeLab-AP
+#   B8:27:EB   Raspberry Pi Foundation

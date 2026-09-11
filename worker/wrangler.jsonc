@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "labs",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+
+  "observability": {
+    "enabled": true
+  },
+
+  // Custom domain: labs.inpriv.xyz
+  // Configure routes / custom domains in the Cloudflare dashboard
+  // or via `wrangler routes put` after first deploy.
+  "routes": [
+    {
+      "pattern": "labs.inpriv.xyz",
+      "custom_domain": true
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+ENV/
+
+# Node / Wrangler
+worker/node_modules/
+.wrangler/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Project artefacts
+**/*.pcap
+**/*.pcapng
+**/*.cap
+reports/
+logs/
+sessions/
+
+# Local config / secrets
+.env
+.env.local
+config.local.py

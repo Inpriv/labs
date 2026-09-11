@@ -1,0 +1,7 @@
+# Core dependencies for air
+#
+# On most Linux systems, the *Python* dependencies are installed via pip while
+# the *system* tools (iw, iwconfig, ip, tcpdump-style raw sockets) are part
+# of your distro. The install.sh helper handles both sides.
+
+scapy>=2.5.0
