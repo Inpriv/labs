@@ -1,0 +1,3 @@
+# trns has no third-party dependencies.
+# Everything uses the Python standard library (urllib, json, winreg, msvcrt, …).
+# Python 3.9 or newer is required (uses str.removeprefix / dataclasses / X | Y).

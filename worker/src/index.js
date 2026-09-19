@@ -30,6 +30,28 @@ const EXPERIMENTS = [
       "Authorized use only. Deauthentication against networks you do not own " +
       "or have explicit written permission to test is illegal in most jurisdictions.",
   },
+  {
+    slug: "trns",
+    name: "trns",
+    tagline: "Terminal translator (Google free endpoint, no API key)",
+    repo: "https://github.com/Inpriv/labs/tree/main/tools/trns",
+    docs: "https://github.com/Inpriv/labs/blob/main/tools/trns/README.md",
+    status: "experimental",
+    description:
+      "Tiny interactive Python CLI for ad-hoc translations from your shell. " +
+      "Type a phrase, get a translation, hit Tab to swap source/target in place. " +
+      "Backed by translate.googleapis.com so it needs no API key and no " +
+      "third-party dependencies — only the Python 3.9+ standard library.",
+    install: [
+      "git clone https://github.com/Inpriv/labs.git",
+      "cd labs/tools/trns",
+      "./install.sh             # Linux/macOS (or install.bat on Windows)",
+      "trns                     # REPL",
+      "trns hello world         # one-shot translation",
+    ],
+    requirements: ["Python 3.9+", "network access to translate.googleapis.com"],
+    legal: "",
+  },
 ];
 
 function escape(s) {
