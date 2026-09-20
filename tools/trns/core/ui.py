@@ -98,6 +98,84 @@ ESC = b"\x1b"
 # escape sequence when a Windows special key is detected.
 _PENDING_BYTES: bytearray = bytearray()
 
+# Debug logging of raw stdin bytes. Opt-in via ``trns --debug-input`` (see
+# trns.py) — primarily to diagnose Termux / Bluetooth-keyboard issues where
+# the user reports that a key (Tab, arrow, …) doesn't reach the parser.
+# Off by default because every keystroke = a log line.
+_DEBUG_INPUT: bool = False
+_DEBUG_INPUT_STREAM = None  # type: ignore[var-annotated]
+
+
+def _set_debug_input(enabled: bool, path: Optional[str]) -> None:
+    """Toggle byte-level input tracing.
+
+    When enabled, every byte read from stdin is logged to ``stderr`` *and* to
+    ``path`` (if given) as a single line per byte:
+
+        +0.000123  0x09 (\\t) [TAB]
+
+    Timestamps are relative to the first byte in the run so the log is
+    stable across TZs and clock changes.
+    """
+    global _DEBUG_INPUT, _DEBUG_INPUT_STREAM
+    _DEBUG_INPUT = bool(enabled)
+    if _DEBUG_INPUT_STREAM is not None:
+        try:
+            _DEBUG_INPUT_STREAM.close()
+        except Exception:
+            pass
+        _DEBUG_INPUT_STREAM = None
+    if enabled and path:
+        try:
+            _DEBUG_INPUT_STREAM = open(path, "a", buffering=1, encoding="utf-8")
+        except OSError as exc:
+            import sys as _sys
+            print(f"trns: cannot open debug log at {path!r}: {exc}", file=_sys.stderr)
+
+
+import time as _time  # noqa: E402  (kept near _debug_log_byte for clarity)
+_DEBUG_INPUT_T0: Optional[float] = None
+
+
+def _debug_log_byte(b: bytes) -> None:
+    if not _DEBUG_INPUT:
+        return
+    global _DEBUG_INPUT_T0
+    if _DEBUG_INPUT_T0 is None:
+        _DEBUG_INPUT_T0 = _time.monotonic()
+    dt = _time.monotonic() - _DEBUG_INPUT_T0
+    if not b:
+        label = "<empty>"
+        hex_repr = ""
+    else:
+        b0 = b[0]
+        if b0 == 0x09:
+            label = "[TAB]"
+        elif b0 == 0x0a:
+            label = "[LF]"
+        elif b0 == 0x0d:
+            label = "[CR]"
+        elif b0 == 0x1b:
+            label = "[ESC]"
+        elif b0 == 0x7f:
+            label = "[DEL]"
+        elif b0 < 0x20:
+            label = f"[CTRL+{chr(b0 + 0x40)}]"
+        elif b0 == 0x20:
+            label = "[SP]"
+        elif 0x20 < b0 < 0x7f:
+            label = f"'{chr(b0)}'"
+        elif b0 >= 0x80:
+            label = f"<utf8-prefix 0x{b0:02x}>"
+        else:
+            label = "?"
+        hex_repr = " ".join(f"0x{x:02x}" for x in b)
+    line = f"+{dt:7.3f}  {hex_repr:<16} {label}\n"
+    import sys as _sys
+    _sys.stderr.write(line)
+    if _DEBUG_INPUT_STREAM is not None:
+        _DEBUG_INPUT_STREAM.write(line)
+
 
 _MSVC_SPECIAL_TO_VT: dict = {
     0x48: b"\x1b[A",  # Up
@@ -116,10 +194,12 @@ _MSVC_SPECIAL_TO_VT: dict = {
 def _read_byte() -> bytes:
     """Read exactly one byte of input. Windows special-key pairs are
     translated into matching VT escape sequences so the parser below
-    stays platform-agnostic."""
-
+    stays platform-agnostic.
+    """
     if _PENDING_BYTES:
-        return bytes([_PENDING_BYTES.pop(0)])
+        b = bytes([_PENDING_BYTES.pop(0)])
+        _debug_log_byte(b)
+        return b
     if sys.platform == "win32":
         import msvcrt  # type: ignore[import-not-found]
         b = msvcrt.getch()
@@ -129,10 +209,16 @@ def _read_byte() -> bytes:
             if vt:
                 if len(vt) > 1:
                     _PENDING_BYTES.extend(vt[1:])
-                return vt[:1]
+                first = vt[:1]
+                _debug_log_byte(first)
+                return first
+            _debug_log_byte(b"")
             return b""
+        _debug_log_byte(b)
         return b
-    return os.read(sys.stdin.fileno(), 1)
+    b = os.read(sys.stdin.fileno(), 1)
+    _debug_log_byte(b)
+    return b
 
 
 def _char_width(ch: str) -> int:

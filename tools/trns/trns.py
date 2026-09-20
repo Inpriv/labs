@@ -184,6 +184,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--color", choices=("auto", "always", "never"),
                    default="auto",
                    help="control ANSI colour output")
+    p.add_argument("--debug-input", nargs="?", const="-", default=None, metavar="PATH",
+                   help=("log every byte read from stdin to PATH (or stderr if '-') "
+                         "with timestamps. Useful for diagnosing Termux / "
+                         "Bluetooth-keyboard issues where a key (Tab, arrows) "
+                         "does not reach the parser."))
     return p
 
 
@@ -194,6 +199,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         os.environ["TRNS_COLOR"] = "1"
     elif args.color == "never":
         os.environ.pop("TRNS_COLOR", None)
+
+    # --debug-input: enable byte-level stdin tracing before any REPL runs.
+    # "args.debug_input is not None" means the flag was passed; const="-"
+    # means "no value" maps to stderr, any other value is treated as a path.
+    if args.debug_input is not None:
+        from core import ui as _ui_dbg
+        _path = None if args.debug_input == "-" else args.debug_input
+        _ui_dbg._set_debug_input(True, _path)
 
     script_dir = _HERE
 
