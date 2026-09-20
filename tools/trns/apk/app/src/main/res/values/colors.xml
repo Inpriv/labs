@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same color as themeColor in twa-manifest.json. -->
+    <color name="ic_launcher_background">#14111C</color>
+
+    <color name="shortcut_background">#14111C</color>
+</resources>

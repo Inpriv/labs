@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    AndroidManifest.xml for the trns TWA.
+
+    - packageId matches twa-manifest.json ("xyz.inpriv.trns")
+    - hostName + default URL point to https://trns-pwa.saloyek.workers.dev
+      (the public PWA; the custom domain trns.inpriv.xyz mirrors the same Worker).
+    - meta-data android.max_aspect lets the app fill the screen.
+    - android:usesCleartextTraffic is not set; only HTTPS is used.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="xyz.inpriv.trns"
+    android:versionCode="2"
+    android:versionName="0.1.0-beta">
+
+    <uses-sdk
+        android:minSdkVersion="19"
+        android:targetSdkVersion="34" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/appName"
+        android:supportsRtl="true"
+        android:theme="@style/LaunchTheme"
+        android:usesCleartextTraffic="false">
+
+        <meta-data
+            android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts" />
+
+        <!-- The launcher activity. WebviewLauncherActivity is the standard
+             bubblewrap activity; trust="true" lets us host the webview without
+             extra chrome wrapping. -->
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/LaunchTheme">
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- TWA verification: Digital Asset Links -->
+            <meta-data
+                android:name="asset_statements"
+                android:value="@string/assetStatements" />
+
+            <!-- The starting URL -->
+            <meta-data
+                android:name="defaultUrl"
+                android:value="https://trns-pwa.saloyek.workers.dev" />
+
+            <!-- Status / nav bar colors -->
+            <meta-data
+                android:name="android.theme"
+                android:value="@style/LaunchTheme" />
+
+            <!-- Screen orientation: lock to portrait for the translator UI -->
+            <meta-data
+                android:name="orientation"
+                android:value="portrait" />
+
+            <meta-data
+                android:name="android.max_aspect"
+                android:value="2.4" />
+        </activity>
+
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.WebActivityFallthrough"
+            android:exported="true"
+            android:theme="@style/LaunchTheme" />
+    </application>
+
+</manifest>

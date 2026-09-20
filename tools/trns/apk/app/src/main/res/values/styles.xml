@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    LaunchTheme for the trns TWA — matches Android's recommended
+    transparent splash so the TWA opens directly to the PWA without a
+    white flash. Status / nav bar are derived from themeColor.
+-->
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:statusBarColor">#14111C</item>
+        <item name="android:navigationBarColor">#14111C</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

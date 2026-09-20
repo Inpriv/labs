@@ -34,3 +34,29 @@ reports/
 .env
 .env.local
 config.local.py
+
+# --- trns PWA + Android APK additions ---
+
+# Original CLI tool (trns.py, core/) at the repo root is untouched.
+# This subtree adds:
+#   app/                PWA source (HTML/JS/CSS, manifest, SW, icons)
+#   apk/                Gradle project; debug APK in
+#                       apk/app/build/outputs/apk/debug/app-debug.apk
+#   cloudflare-worker/  Worker serving the PWA at
+#                       https://trns.inpriv.xyz and
+#                       https://trns-pwa.saloyek.workers.dev
+
+# Built Android artefacts (huge, regenerable from sources)
+apk/.gradle/
+apk/build/
+apk/app/build/
+apk/local.properties
+apk/app/release/
+apk/captures/
+apk/.cxx/
+
+# Android Studio noise
+*.iml
+.idea/
+.gradle/
+.kotlin/

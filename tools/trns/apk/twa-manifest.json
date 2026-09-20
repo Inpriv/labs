@@ -1,0 +1,41 @@
+{
+  "packageId": "xyz.inpriv.trns",
+  "host": "trns-pwa.saloyek.workers.dev",
+  "name": "trns — translator",
+  "launcherName": "trns",
+  "display": "standalone",
+  "orientation": "portrait",
+  "iconUrl": "https://trns.inpriv.xyz/icons/icon-512.png",
+  "maskableIconUrl": "https://trns.inpriv.xyz/icons/icon-512-maskable.png",
+  "monochromeIconUrl": "https://trns.inpriv.xyz/icons/icon-192.png",
+  "themeColor": "#14111c",
+  "backgroundColor": "#14111c",
+  "enableSiteSettingsShortcut": true,
+  "isMetadata": false,
+  "isManifest": true,
+  "isPostMessage": false,
+  "fallbackType": "customtabs",
+  "splashScreenFadeOutDuration": 300,
+  "webManifestUrl": "https://trns-pwa.saloyek.workers.dev/manifest.webmanifest",
+  "versionCode": 1,
+  "versionName": "0.1.0-beta",
+  "signingKey": {
+    "path": "./trns.keystore",
+    "alias": "trns"
+  },
+  "appBundleId": "xyz.inpriv.trns",
+  "appBundleLabel": "trns — translator",
+  "shareTarget": null,
+  "components": [],
+  "alphaDependencies": {
+    "enabled": false,
+    "version": ""
+  },
+  "startUrl": "/",
+  "scopes": ["/", "."],
+  "manifestUrl": null,
+  "relaunchButtonUrl": null,
+  "isChromeOSInstall": true,
+  "requestHandling": null,
+  "additionalChromeBrowsers": []
+}
