@@ -1,0 +1,8 @@
+# Core dependencies for trns.
+#
+# trns is intentionally zero-dep: it only uses the Python standard library
+# so a fresh `python3` install is enough to run it. This file is kept for
+# tooling compatibility (pip install -r requirements.txt, Dependabot, etc.)
+# and currently pins nothing.
+
+# (empty — stdlib only)
