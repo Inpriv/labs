@@ -197,26 +197,36 @@ def remove_from_path(directory: str) -> bool:
 
     On POSIX, also strips the ``# >>> trns init >>>`` sentinel block we
     previously wrote to the user's shell rc files.
+
+    Note: a fresh --path-remove process inherits its parent's PATH, which
+    does NOT include directories that --path-add pushed into the parent's
+    shell rc. So we always scrub the rc file on POSIX (idempotent) and let
+    the in-memory PATH update only happen when the directory was actually
+    present in this process.
     """
     directory_abs = os.path.normcase(os.path.abspath(directory))
     current = current_user_path()
     parts = [p for p in current.split(os.pathsep) if p]
     new_parts: list[str] = []
-    changed = False
+    path_changed = False
     for p in parts:
         try:
             if os.path.normcase(os.path.abspath(p)) == directory_abs:
-                changed = True
+                path_changed = True
                 continue
         except OSError:
             pass
         new_parts.append(p)
-    if not changed:
-        return False
-    _set_user_path(os.pathsep.join(new_parts))
-    if sys.platform != "win32":
-        _remove_posix_persistence(directory)
-    return True
+    if path_changed:
+        _set_user_path(os.pathsep.join(new_parts))
+
+    if sys.platform == "win32":
+        return path_changed
+
+    # POSIX: scrub the rc file sentinel; it lives outside the process and is
+    # the source of truth for the user's PATH on next login.
+    rc_changed = _remove_posix_persistence(directory)
+    return path_changed or rc_changed
 
 
 # ---------------------------------------------------------------------------
@@ -367,14 +377,17 @@ def _write_posix_rc(path: str, directory: str) -> None:
     _write_text(path, new_content)
 
 
-def _remove_posix_persistence(directory: str) -> None:
+def _remove_posix_persistence(directory: str) -> bool:
     """Strip the trns sentinel from every shell rc it was written to.
 
     Called by `remove_from_path` so /path toggle cleans up after itself.
+
+    Returns True if any rc file was actually modified.
     """
     directory_abs = os.path.normcase(os.path.abspath(directory))
     candidates = [_termux_profile_d_path()] + _posix_rc_files()
     seen: set[str] = set()
+    modified = False
     for path in candidates:
         if not path or path in seen:
             continue
@@ -385,10 +398,12 @@ def _remove_posix_persistence(directory: str) -> None:
         stripped = _strip_sentinel_block(content)
         if stripped != content:
             _write_text(path, stripped)
+            modified = True
         # If the file we just edited is the only thing left and it's now
         # effectively empty, leave it alone — users notice disappearing rc
         # files far more than they notice a single empty line.
         _ = directory_abs  # referenced for parity; future toggle-by-dir use
+    return modified
 
 
 __all__ = [
