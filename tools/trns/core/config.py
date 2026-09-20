@@ -318,6 +318,10 @@ def _persist_posix_path(directory: str) -> None:
 
     The previous sentinel block (if any) is stripped before re-insertion so
     toggling PATH off and back on never accumulates duplicates.
+
+    If the user has no shell rc file at all (a freshly-created user, a Docker
+    container, minimal installs) we *create* ~/.bashrc with a header comment
+    so the export has somewhere to live — better than silently doing nothing.
     """
     if not directory:
         return
@@ -328,7 +332,26 @@ def _persist_posix_path(directory: str) -> None:
             _write_posix_rc(path, directory)
         return
 
-    for rc in _posix_rc_files():
+    rc_files = _posix_rc_files()
+    if not rc_files:
+        # No rc files exist — create ~/.bashrc as the canonical fallback.
+        # ~/.bashrc is sourced by interactive bash, which is what most CLI
+        # users run. If they prefer zsh or fish they can move the block.
+        candidate = os.path.join(os.path.expanduser("~"), ".bashrc")
+        if not os.path.exists(candidate):
+            # Idempotent: only create if truly missing. Leave the file alone
+            # if it's a broken symlink or unreadable — we don't want to
+            # overwrite user data we can't see.
+            try:
+                with open(candidate, "a", encoding="utf-8", newline="\n") as f:
+                    f.write("# ~/.bashrc — created by trns installer.\n"
+                            "# Login shells also source ~/.profile; the same\n"
+                            "# sentinel block is mirrored there when present.\n")
+            except OSError:
+                return
+        rc_files = [candidate]
+
+    for rc in rc_files:
         _write_posix_rc(rc, directory)
 
 
