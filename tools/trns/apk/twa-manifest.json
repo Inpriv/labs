@@ -1,6 +1,6 @@
 {
   "packageId": "xyz.inpriv.trns",
-  "host": "trns-pwa.saloyek.workers.dev",
+  "host": "trns.inpriv.xyz",
   "name": "trns — translator",
   "launcherName": "trns",
   "display": "standalone",
@@ -16,9 +16,9 @@
   "isPostMessage": false,
   "fallbackType": "customtabs",
   "splashScreenFadeOutDuration": 300,
-  "webManifestUrl": "https://trns-pwa.saloyek.workers.dev/manifest.webmanifest",
-  "versionCode": 1,
-  "versionName": "0.1.0-beta",
+  "webManifestUrl": "https://trns.inpriv.xyz/manifest.webmanifest",
+  "versionCode": 3,
+    "versionName": "0.1.1-beta",
   "signingKey": {
     "path": "./trns.keystore",
     "alias": "trns"

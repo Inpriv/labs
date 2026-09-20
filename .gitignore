@@ -42,3 +42,8 @@ sessions/
 .env
 .env.local
 config.local.py
+
+# local sync notes
+LOCAL-SYNC.md
+# built APK + legacy APKs
+tools/trns/*.apk

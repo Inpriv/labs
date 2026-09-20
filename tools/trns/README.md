@@ -203,12 +203,12 @@ an installable Android APK with identical translation behaviour.
 ### Live
 
 - **Production**: https://trns.inpriv.xyz
-- **Fallback**: https://trns-pwa.saloyek.workers.dev
-- **Digital Asset Links**: https://trns-pwa.saloyek.workers.dev/.well-known/assetlinks.json
+- **Digital Asset Links**: https://trns.inpriv.xyz/.well-known/assetlinks.json
 
 The Android `asset_statements` string in
-`apk/app/src/main/res/values/strings.xml` points at the same two
-URLs — that is what lets the TWA open URLs in-app rather than
+`apk/app/src/main/res/values/strings.xml` and the matching entry in
+the Worker's `/.well-known/assetlinks.json` both reference the same
+URL — that is what lets the TWA open URLs in-app rather than
 routing them through Chrome.
 
 ### Translation backend
@@ -257,11 +257,22 @@ cd cloudflare-worker && npx wrangler@4 deploy
 ### Install status
 
 - **packageId**: `xyz.inpriv.trns`
-- **versionCode**: 2
-- **versionName**: `0.1.0-beta`
+- **versionCode**: 3
+- **versionName**: `0.1.1-beta`
 - **minSdk**: 21 (Android 5.0)
 - **targetSdk**: 36 (Android 16)
 
 Beta channel. Asset Links + service worker registered; no analytics;
 no third-party SDKs.
->>>>>>> c25dc29 (feat(trns): PWA + TWA Android app + Cloudflare Worker)
+
+### Verify
+
+```bash
+# Live page (Cloudflare edge)
+curl -sI https://trns.inpriv.xyz/ | head -1
+
+# Digital Asset Links — same single URL the APK's asset_statements
+# references; if these disagree, the TWA will not verify and will
+# crash on launch.
+curl -s https://trns.inpriv.xyz/.well-known/assetlinks.json | python -m json.tool
+```

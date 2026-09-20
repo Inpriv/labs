@@ -29,9 +29,8 @@
         \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
-            \"site\": \"https://trns-pwa.saloyek.workers.dev\"
+            \"site\": \"https://trns.inpriv.xyz\"
         }
     }]
-    
-  </string>  
+  </string>
 </resources>

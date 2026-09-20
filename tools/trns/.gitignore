@@ -43,8 +43,7 @@ config.local.py
 #   apk/                Gradle project; debug APK in
 #                       apk/app/build/outputs/apk/debug/app-debug.apk
 #   cloudflare-worker/  Worker serving the PWA at
-#                       https://trns.inpriv.xyz and
-#                       https://trns-pwa.saloyek.workers.dev
+#                          https://trns.inpriv.xyz
 
 # Built Android artefacts (huge, regenerable from sources)
 apk/.gradle/

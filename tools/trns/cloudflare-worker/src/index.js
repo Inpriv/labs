@@ -1,5 +1,5 @@
-// trns-pwa Cloudflare Worker
-// Serves the PWA at trns.inpriv.xyz + trns-pwa.saloyek.workers.dev.
+// trns Cloudflare Worker
+// Serves the PWA at https://trns.inpriv.xyz.
 // ASSETS binding handles the static UI; dynamic routes here cover
 // anything that needs custom logic (Digital Asset Links, security
 // headers, offline fallback for the service-worker shell).
@@ -26,9 +26,6 @@ const SECURITY_HEADERS = {
 };
 
 const ASSETLINKS = [{
-  relation: ["delegate_permission/common.handle_all_urls"],
-  target: { namespace: "web", site: "https://trns-pwa.saloyek.workers.dev" },
-}, {
   relation: ["delegate_permission/common.handle_all_urls"],
   target: { namespace: "web", site: "https://trns.inpriv.xyz" },
 }];

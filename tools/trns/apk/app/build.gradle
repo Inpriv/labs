@@ -22,7 +22,7 @@ plugins {
 
 def twaManifest = [
     applicationId: 'xyz.inpriv.trns',
-    hostName: 'trns-pwa.saloyek.workers.dev', // The domain being opened in the TWA.
+    hostName: 'trns.inpriv.xyz', // The domain being opened in the TWA.
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: 'trns — translator', // The application name.
     launcherName: 'trns', // The name shown on the Android Launcher.
@@ -57,8 +57,8 @@ android {
         applicationId "xyz.inpriv.trns"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 2
-        versionName "0.1.0-beta"
+        versionCode 3
+                versionName "0.1.1-beta"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -76,7 +76,7 @@ android {
             // The URL the Web Manifest for the Progressive Web App that the TWA points to. This
             // is used by Chrome OS and Meta Quest to open the Web version of the PWA instead of
             // the TWA, as it will probably give a better user experience for non-mobile devices.
-            resValue "string", "webManifestUrl", 'https://trns-pwa.saloyek.workers.dev/manifest.webmanifest'
+            resValue "string", "webManifestUrl", 'https://trns.inpriv.xyz/manifest.webmanifest'
         
 
         
