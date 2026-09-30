@@ -22,7 +22,8 @@ All notable changes to this project are documented here. The format follows
   (Windows PowerShell, no admin). Both verify the install, support update and
   uninstall, and accept a ref (`TRNS_REF` / `-Ref`) or a local checkout
   (`TRNS_SRC` / `-Source`).
-- Installable project site (PWA) in `site/`.
+- Installable project site (PWA) in `site/`, deployed to trns.inpriv.xyz by the
+  Worker in `worker/` (admin kill-switch kept, strict CSP, no inline code).
 - Tap targets: language chip (swap), history cards (copy), action pills.
 - `/copy` and a clipboard layer (Termux:API, pbcopy, wl-copy, xclip, xsel,
   clip, OSC 52).

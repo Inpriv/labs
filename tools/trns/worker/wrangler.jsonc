@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Same name as the previous deployment so `wrangler deploy` updates the
+  // existing Worker in place (and keeps its trns.inpriv.xyz binding).
+  "name": "trns-pwa",
+  "main": "src/index.js",
+  "compatibility_date": "2026-04-01",
+  "workers_dev": true,
+  "routes": [{ "pattern": "trns.inpriv.xyz", "custom_domain": true }],
+  "observability": { "enabled": true },
+
+  // The project site lives in ../site. run_worker_first lets the admin
+  // kill-switch (src/gate.js) intercept every request before an asset is served.
+  "assets": {
+    "directory": "../site",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  }
+}

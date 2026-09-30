@@ -173,8 +173,9 @@ Edit it directly or use `/settings`. UTF-8, two-space indent, no BOM.
 
 [`site/`](site/) is a single static page - no build step - with a live demo of
 the interface. It ships a web manifest and a service worker, so it can be
-added to a phone's home screen and works offline. Deploy the folder to
-GitHub Pages, Cloudflare Pages, or anything that serves static files:
+added to a phone's home screen and works offline. It is live at **[trns.inpriv.xyz](https://trns.inpriv.xyz)**, served by the
+Cloudflare Worker in [`worker/`](worker/) (`npx wrangler@4 deploy`). Any static
+host works too:
 
 ```bash
 python -m http.server -d site 8080     # preview at http://localhost:8080
@@ -199,7 +200,8 @@ trns/
 │   ├── clipboard.py   cross-platform copy
 │   └── utils.py       colour tokens + language registry
 ├── tests/             stdlib unittest, no network
-├── site/              project website + PWA
+├── site/              project website + PWA (served at trns.inpriv.xyz)
+├── worker/            Cloudflare Worker that serves site/ (wrangler.jsonc)
 └── docs/              README assets
 ```
 

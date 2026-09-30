@@ -1,6 +1,6 @@
 /* trns site service worker: offline-first app shell, network-first for the page. */
-const CACHE = "trns-site-v1";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icon.svg",
+const CACHE = "trns-site-v2";
+const SHELL = ["./", "index.html", "site.css", "site.js", "manifest.webmanifest", "icon.svg",
                "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
