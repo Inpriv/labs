@@ -38,7 +38,7 @@ class TranslationError(RuntimeError):
     """Raised when the endpoint is unreachable or returns junk."""
 
 
-def _unwrap(payload) -> str:
+def _unwrap(payload) -> tuple[str, Optional[str]]:
     """Translate.googleapis.com returns a 3-level nested array.
 
     [

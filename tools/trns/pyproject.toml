@@ -1,0 +1,13 @@
+# Tool configuration only. trns runs from source / via install.sh and has no
+# build backend or runtime dependencies.
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

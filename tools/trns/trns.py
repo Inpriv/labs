@@ -20,23 +20,16 @@ from typing import Optional
 
 # Make ``import core.*`` work whether you're running ``python trns.py`` from
 # the source folder or ``trns`` from anywhere on PATH.
-_HERE = os.path.dirname(os.path.abspath(__file__))
+_HERE = os.path.dirname(os.path.realpath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 from core import config as config_mod
-from core import translator, ui, utils
+from core import __version__ as VERSION
+from core import translator, ui, utils, view
 from core.config import Config, add_to_path, remove_from_path
-from core.ui import Direction
-
-
-VERSION = "0.1.0"
-
-BANNER = r""" _
-| |_ _ __ _ __  ___
-| __| '__| '_ \/ __|
-| |_| |  | | | \__ \
- \__|_|  |_| |_|___/"""
+from core.direction import Direction
+from core.theme import glyph
 
 
 # ---------------------------------------------------------------------------
@@ -45,69 +38,54 @@ BANNER = r""" _
 
 
 def _maybe_first_run(cfg: Config, script_dir: str) -> Config:
-    """If this is the first time trns has ever been launched, prompt for the
-    PATH opt-in (and a few language defaults) before entering the REPL."""
+    """First launch only: PATH opt-in and default languages."""
 
     if cfg.first_run_done:
         return cfg
 
-    print(utils.primary(ui.BANNER))
-    print(utils.bold("Welcome to trns.") + utils.muted(
-        " First-time setup will only take a moment."
-    ))
     print()
+    print(utils.primary(ui.BANNER))
+    print()
+    print(f" {utils.bold('Welcome to trns.')} "
+          f"{utils.muted('Two quick questions, then you are in.')}")
 
     # 1) PATH opt-in ------------------------------------------------------
-    print(utils.bold("1/2  Add 'trns' to your PATH?"))
-    print(
-        utils.dim(
-            "    If you say yes, typing  trns  in any new terminal window "
-            "will launch this script."
-        )
-    )
-    print(utils.dim(f"    Directory to add:  {script_dir}"))
+    ui.step(1, 2, "Add 'trns' to your PATH?")
+    print(utils.dim("    Lets you type  trns  in any new terminal."))
+    print(utils.dim(f"    {script_dir}"))
     print()
 
     if ui.confirm("Add to PATH?", default=False):
         if add_to_path(script_dir):
-            ui.notify("added to user PATH", "ok")
-            print(utils.warn(
-                "    → open a new terminal window for the change to take effect."
-            ))
+            ui.notify("added to PATH", "ok")
+            ui.notify("open a new terminal for this to take effect", "warn")
         else:
             ui.notify("already on PATH", "info")
         cfg.path_opt_in = True
-        cfg.path_dir = script_dir
     else:
-        print(utils.dim(
-            "    no worries — you can enable it later from /settings."
-        ))
+        print(utils.dim("    no problem - enable it later from /settings."))
         cfg.path_opt_in = False
-        cfg.path_dir = script_dir  # remember even if declined, so /settings works
-
-    print()
+    cfg.path_dir = script_dir  # remembered so /settings can toggle it later
 
     # 2) Languages -------------------------------------------------------
-    print(utils.bold("2/2  Choose default languages"))
-    print(utils.dim("    press Enter to accept the defaults (English -> Polish)."))
-    print()
+    ui.step(2, 2, "Choose your languages")
+    print(utils.dim("    Enter accepts the default (English to Polish)."))
 
-    src = ui.pick_language("Source language", default=config_mod.DEFAULT_SOURCE)
+    src = ui.pick_language("Translate from", default=config_mod.DEFAULT_SOURCE)
     if src:
         cfg.source = src
     tgt = ui.pick_language(
-        "Target language",
+        "Translate to",
         exclude=cfg.source,
         default=config_mod.DEFAULT_TARGET,
+        allow_auto=False,
     )
     if tgt:
         cfg.target = tgt
 
     print()
-    print(
-        utils.success("Setup complete. ")
-        + utils.muted(f"Default: {Direction(cfg.source, cfg.target).label()}")
-    )
+    print(f" {utils.success(glyph('ok'))} {utils.bold('All set.')} "
+          f"{utils.muted(Direction(cfg.source, cfg.target).label())}")
     print()
 
     cfg.first_run_done = True
@@ -135,12 +113,19 @@ def _oneshot(text: str, cfg: Config, *, swap: bool) -> int:
         ui.notify(str(e), "err")
         return 1
 
-    src = direction.source
-    if src == "auto" and result.detected_source_lang:
-        detected = utils.language_name(result.detected_source_lang)
-        print(f"{utils.dim('detected:')} {utils.success(detected)}")
-    print(f"{utils.dim(text)}")
-    print(utils.bold(utils.primary(result.text)))
+    # Piped / redirected: emit only the translation so scripts can consume it.
+    if not sys.stdout.isatty():
+        print(result.text)
+        return 0
+
+    cols, _ = ui._terminal_size()
+    print()
+    for line in view.oneshot_card(
+        direction, text, result.text, min(cols, 100),
+        detected=result.detected_source_lang,
+    ):
+        print(line)
+    print()
     return 0
 
 
@@ -184,6 +169,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--color", choices=("auto", "always", "never"),
                    default="auto",
                    help="control ANSI colour output")
+    p.add_argument("--debug-input", nargs="?", const="-", default=None, metavar="PATH",
+                   help=("log every byte read from stdin to PATH (or stderr if '-') "
+                         "with timestamps. Useful for diagnosing Termux / "
+                         "Bluetooth-keyboard issues where a key (Tab, arrows) "
+                         "does not reach the parser."))
     return p
 
 
@@ -194,6 +184,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         os.environ["TRNS_COLOR"] = "1"
     elif args.color == "never":
         os.environ.pop("TRNS_COLOR", None)
+
+    # --debug-input: enable byte-level stdin tracing before any REPL runs.
+    # "args.debug_input is not None" means the flag was passed; const="-"
+    # means "no value" maps to stderr, any other value is treated as a path.
+    if args.debug_input is not None:
+        from core import keys as _keys_dbg
+        _path = None if args.debug_input == "-" else args.debug_input
+        _keys_dbg._set_debug_input(True, _path)
 
     script_dir = _HERE
 

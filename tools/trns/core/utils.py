@@ -66,14 +66,38 @@ def _force_color() -> bool:
     return os.environ.get("TRNS_COLOR", "").lower() in ("1", "yes", "always", "on")
 
 
+def color_enabled() -> bool:
+    """True when ANSI styling should be emitted.
+
+    Honours https://no-color.org: a non-empty ``NO_COLOR`` disables styling
+    unless the user forced it with ``--color always``.
+    """
+
+    if _force_color():
+        return True
+    if os.environ.get("NO_COLOR"):
+        return False
+    return _IS_TTY
+
+
 def _wrap(code: str, text: str) -> str:
-    if _IS_TTY or _force_color():
+    if color_enabled():
         return f"{code}{text}{RESET}"
     return text
 
 
+def _bg(r: int, g: int, b: int) -> str:
+    return f"[48;2;{r};{g};{b}m"
+
+
+# Design tokens (Inpriv M3 dark). Surfaces are used for tappable "pills".
+ON_PRIMARY = (39, 30, 76)      # text drawn on a primary-coloured chip
+SURFACE_HI = (54, 50, 66)      # raised surface: buttons / pills
+PRIMARY = (203, 190, 255)
+
+
 def primary(text: str) -> str:
-    return _wrap(_rgb(203, 190, 255), text)
+    return _wrap(_rgb(*PRIMARY), text)
 
 
 def error(text: str) -> str:
@@ -98,6 +122,28 @@ def warn(text: str) -> str:
 
 def bold(text: str) -> str:
     return _wrap(BOLD, text)
+
+
+def chip(text: str) -> str:
+    """Filled accent pill (primary background). ``[ text ]`` without colour."""
+
+    if not color_enabled():
+        return f"[{text}]"
+    return f"{_bg(*PRIMARY)}{_rgb(*ON_PRIMARY)}{BOLD} {text} {RESET}"
+
+
+def pill(text: str) -> str:
+    """Subtle raised button. ``[text]`` without colour."""
+
+    if not color_enabled():
+        return f"[{text}]"
+    return f"{_bg(*SURFACE_HI)}{_rgb(203, 196, 212)} {text} {RESET}"
+
+
+def chip_width(text: str) -> int:
+    """Visible width of :func:`chip` / :func:`pill` output for ``text``."""
+
+    return len(text) + 2
 
 
 def clear_line() -> str:
@@ -189,7 +235,6 @@ LANGUAGES: dict[str, str] = {
     "zh": "Chinese",
     "zh-cn": "Chinese (Simplified)",
     "zh-tw": "Chinese (Traditional)",
-    "mn": "Mongolian",
     "yi": "Yiddish",
     "eo": "Esperanto",
     "la": "Latin",
