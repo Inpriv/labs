@@ -55,27 +55,54 @@ rows**). Everything else is that layout with more room.
 
 ## Install
 
-### Linux, macOS, WSL, Termux
+**Linux · macOS · WSL · Termux**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/main/tools/trns/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.sh | bash
 ```
 
-The installer detects your distro, installs `python3` if it's missing, drops
-the sources in `~/.local/share/trns/`, creates a launcher at
-`~/.local/bin/trns` (or `$PREFIX/bin/trns` on Termux), and **asks** before it
-touches your PATH (`--path-add` / `--path-skip` to answer up front).
-
-### Windows
+**Windows** (PowerShell)
 
 ```powershell
-git clone https://github.com/Inpriv/labs.git
-cd labs\tools\trns
-.\install.bat        # adds this folder to your PATH; open a new terminal after
+irm https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.ps1 | iex
 ```
 
-Or skip the installer and run `python trns.py` straight from the checkout.
-Windows Terminal gives the best rendering.
+Then open a **new terminal** and run `trns`.
+
+<details>
+<summary><b>What the installers do</b> &nbsp;·&nbsp; options, offline installs, other branches</summary>
+
+<br>
+
+- **`install.sh`** detects your distro, installs `python3` if it's missing,
+  puts the sources in `~/.local/share/trns/`, creates a launcher at
+  `~/.local/bin/trns` (`$PREFIX/bin/trns` on Termux) and **asks** before it
+  touches your PATH.
+- **`install.ps1`** needs no admin rights: it installs to
+  `%LOCALAPPDATA%\trns`, finds a working Python 3.9+, and adds the folder to
+  your *user* PATH.
+- Both verify the install by running `trns --version` before they finish, and
+  both are safe to re-run to update.
+
+| Want to…                    | Linux / macOS / Termux                          | Windows                                   |
+|-----------------------------|-------------------------------------------------|-------------------------------------------|
+| skip the PATH change        | `… \| bash -s -- --path-skip`                   | `-NoPath` *(see below)*                   |
+| add to PATH without asking  | `… \| bash -s -- --path-add`                    | *(default)*                               |
+| update                      | `… \| bash -s -- --update`                      | re-run the one-liner                      |
+| uninstall                   | `… \| bash -s -- --uninstall`                   | `-Uninstall` *(see below)*                |
+| install a different branch  | `TRNS_REF=main … \| bash`                       | `-Ref main`                               |
+| install from a local clone  | `TRNS_SRC=./tools/trns bash install.sh`         | `-Source .\tools\trns`                   |
+
+PowerShell flags need the script-block form:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.ps1))) -NoPath
+```
+
+Prefer to read before you run? Download the script first, inspect it, then
+execute it - or skip the installers and run `python trns.py` from a checkout.
+
+</details>
 
 ### Try it
 
@@ -158,8 +185,9 @@ python -m http.server -d site 8080     # preview at http://localhost:8080
 ```
 trns/
 ├── trns.py            CLI entry point, first-run wizard, argument parsing
-├── install.sh         Linux / macOS / Termux bootstrapper
-├── install.bat  trns.bat  uninstall.bat      Windows helpers
+├── install.sh         Linux / macOS / Termux installer
+├── install.ps1        Windows installer (PowerShell one-liner)
+├── install.bat  trns.bat  uninstall.bat      Windows helpers (from a checkout)
 ├── core/
 │   ├── translator.py  urllib client for translate.googleapis.com
 │   ├── config.py      JSON config + cross-platform PATH handling
@@ -204,11 +232,15 @@ mobile first, and every touch action needs a keyboard equivalent.
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/main/tools/trns/install.sh | bash -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.sh | bash -s -- --uninstall
 ```
 
-Removes the data directory, launcher, `~/.trns`, and the marked block in your
-shell rc files. On Windows run `uninstall.bat`.
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.ps1))) -Uninstall
+```
+
+Both remove the install directory, launcher, `~/.trns` (your config), and the
+PATH entry.
 
 ## License
 

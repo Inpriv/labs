@@ -11,8 +11,8 @@
 # Pure stdlib Python (3.9+), so no pip install required.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/main/tools/trns/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/main/tools/trns/install.sh | bash -s -- --path-add
+#   curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.sh | bash -s -- --path-add
 #   ./install.sh --help
 #
 # Recognised flags:
@@ -29,9 +29,13 @@ set -euo pipefail
 # Plumbing: figure out where we are, where we want to install.
 # ---------------------------------------------------------------------
 
-GITHUB_RAW_BASE="https://raw.githubusercontent.com/Inpriv/labs/main/tools/trns"
-GITHUB_API_BASE="https://api.github.com/repos/Inpriv/labs/contents/tools/trns"
-GITHUB_TARBALL="https://github.com/Inpriv/labs/archive/refs/heads/main.tar.gz"
+# Git ref to install from. Override with TRNS_REF=main (or a tag) once trns
+# is merged into a different branch. TRNS_SRC=/path/to/tools/trns installs
+# from a local checkout instead of downloading (offline installs, testing).
+TRNS_REF="${TRNS_REF:-trns/pwa}"
+TRNS_SRC="${TRNS_SRC:-}"
+GITHUB_RAW_BASE="https://raw.githubusercontent.com/Inpriv/labs/${TRNS_REF}/tools/trns"
+GITHUB_TARBALL="https://github.com/Inpriv/labs/archive/refs/heads/${TRNS_REF}.tar.gz"
 
 # XDG defaults honour XDG_DATA_HOME / XDG_BIN_HOME if set, then fall back
 # to ~/.local. On Termux $PREFIX/bin is always in PATH so we use it.
@@ -268,36 +272,38 @@ fi
 # individual raw URLs would be N round-trips.
 # ---------------------------------------------------------------------
 
-log "Fetching trns from ${GITHUB_TARBALL}"
-
 TMP="$(mktemp -d)"
 trap 'rm -rf "${TMP}"' EXIT
 
-if command -v curl >/dev/null 2>&1; then
-    curl -fsSL --retry 3 --connect-timeout 15 "${GITHUB_TARBALL}" -o "${TMP}/repo.tar.gz" \
-        || { err "Could not download ${GITHUB_TARBALL}"; exit 1; }
-elif command -v wget >/dev/null 2>&1; then
-    wget -q --tries=3 --timeout=20 -O "${TMP}/repo.tar.gz" "${GITHUB_TARBALL}" \
-        || { err "Could not download ${GITHUB_TARBALL}"; exit 1; }
-else
-    err "Neither curl nor wget is installed; cannot download sources."
-    exit 1
-fi
-
-log "Extracting tools/trns/"
-tar -xzf "${TMP}/repo.tar.gz" -C "${TMP}" labs-main/tools/trns/ 2>/dev/null \
-    || tar -xzf "${TMP}/repo.tar.gz" -C "${TMP}" 'labs-*/tools/trns/' 2>/dev/null \
-    || { err "Tarball did not contain tools/trns/"; exit 1; }
-
-# Locate the extracted directory regardless of strip prefix.
 SRC_DIR=""
-for candidate in "${TMP}/labs-main/tools/trns" "${TMP}"/labs-*/tools/trns; do
-    if [[ -d "${candidate}" && -f "${candidate}/trns.py" ]]; then
-        SRC_DIR="${candidate}"
-        break
+if [[ -n "${TRNS_SRC}" ]]; then
+    [[ -f "${TRNS_SRC}/trns.py" ]] || { err "TRNS_SRC=${TRNS_SRC} does not contain trns.py"; exit 1; }
+    log "Installing from local checkout ${TRNS_SRC}"
+    SRC_DIR="${TRNS_SRC}"
+else
+    log "Fetching trns (${TRNS_REF}) from ${GITHUB_TARBALL}"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL --retry 3 --connect-timeout 15 "${GITHUB_TARBALL}" -o "${TMP}/repo.tar.gz"             || { err "Could not download ${GITHUB_TARBALL}"; exit 1; }
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q --tries=3 --timeout=20 -O "${TMP}/repo.tar.gz" "${GITHUB_TARBALL}"             || { err "Could not download ${GITHUB_TARBALL}"; exit 1; }
+    else
+        err "Neither curl nor wget is installed; cannot download sources."
+        exit 1
     fi
-done
-[[ -z "${SRC_DIR}" ]] && { err "Could not find tools/trns/ in archive"; exit 1; }
+
+    log "Extracting"
+    mkdir -p "${TMP}/x"
+    tar -xzf "${TMP}/repo.tar.gz" -C "${TMP}/x" 2>/dev/null         || { err "Could not extract the downloaded archive"; exit 1; }
+
+    # GitHub names the top folder <repo>-<ref with / -> ->; glob for it.
+    for candidate in "${TMP}"/x/*/tools/trns; do
+        if [[ -d "${candidate}" && -f "${candidate}/trns.py" ]]; then
+            SRC_DIR="${candidate}"
+            break
+        fi
+    done
+    [[ -z "${SRC_DIR}" ]] && { err "tools/trns/ not found in '${TRNS_REF}'. Try TRNS_REF=main"; exit 1; }
+fi
 
 # ---------------------------------------------------------------------
 # Install: move sources into $DATA_DIR, write launcher into $BIN_DIR.
@@ -311,6 +317,9 @@ for f in "${DATA_DIR}"/*; do
     [[ -e "${f}" ]] && rm -rf "${f}"
 done
 cp -R "${SRC_DIR}/." "${DATA_DIR}/"
+# Only the runtime is needed on the user's machine.
+rm -rf "${DATA_DIR}/.git" "${DATA_DIR}/site" "${DATA_DIR}/tests" "${DATA_DIR}/docs" \
+       "${DATA_DIR}/__pycache__" "${DATA_DIR}/core/__pycache__"
 chmod +x "${DATA_DIR}/trns.py"
 
 # Launcher — a tiny shell script that exec's the right python against

@@ -3,3 +3,4 @@
 *.py text eol=lf
 *.bat text eol=crlf
 *.svg text eol=lf
+*.ps1 text eol=crlf

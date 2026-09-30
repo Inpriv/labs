@@ -210,21 +210,19 @@ footer .l{display:flex;gap:20px;flex-wrap:wrap}
 <section id="install"><div class="wrap">
   <div class="kicker">Install</div>
   <h2>One command.</h2>
-  <p class="sub">The installer detects your platform, installs Python if it is missing, and asks before touching your PATH.</p>
+  <p class="sub">Paste it, open a new terminal, type <code>trns</code>. The installer checks for Python, verifies itself, and is safe to re-run to update.</p>
   <div class="tabs" role="tablist" aria-label="Platform">
     <button role="tab" aria-selected="true" aria-controls="p-unix" id="t-unix">Linux · macOS · Termux</button>
     <button role="tab" aria-selected="false" aria-controls="p-win" id="t-win">Windows</button>
     <button role="tab" aria-selected="false" aria-controls="p-src" id="t-src">From source</button>
   </div>
   <div class="panel" id="p-unix" role="tabpanel" aria-labelledby="t-unix">
-    <div class="code"><pre><code>curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/main/tools/trns/install.sh | bash</code></pre><button class="copy" data-copy>Copy</button></div>
+    <div class="code"><pre><code>curl -fsSL https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.sh | bash</code></pre><button class="copy" data-copy>Copy</button></div>
     <p class="note">Then open a new terminal and run <code>trns</code>. On Termux, add <code>pkg install termux-api</code> for one-tap copy.</p>
   </div>
   <div class="panel" id="p-win" role="tabpanel" aria-labelledby="t-win" hidden>
-    <div class="code"><pre><code>git clone https://github.com/Inpriv/labs.git
-cd labs\tools\trns
-python trns.py</code></pre><button class="copy" data-copy>Copy</button></div>
-    <p class="note">Needs Python 3.9+. Use Windows Terminal for the best rendering.</p>
+    <div class="code"><pre><code>irm https://raw.githubusercontent.com/Inpriv/labs/trns/pwa/tools/trns/install.ps1 | iex</code></pre><button class="copy" data-copy>Copy</button></div>
+    <p class="note">Run in PowerShell. No admin needed; installs to <code>%LOCALAPPDATA%\trns</code> and adds it to your user PATH. Needs Python 3.9+.</p>
   </div>
   <div class="panel" id="p-src" role="tabpanel" aria-labelledby="t-src" hidden>
     <div class="code"><pre><code>git clone https://github.com/Inpriv/labs.git
