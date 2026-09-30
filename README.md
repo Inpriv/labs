@@ -11,6 +11,10 @@ labs/
 ├── worker/                 Cloudflare Worker for labs.inpriv.xyz (Wrangler)
 └── tools/
     ├── air/                Wi-Fi 802.11 frame injector & PMF/WPA3 auditor
+    ├── drop/               Offline leak scanner: finds keys, tokens, .env
+                            files, seed phrases, PII and photo/document
+                            metadata on your own machine. Read-only, redacted
+                            output, JSON + CI exit codes. Pure stdlib.
     └── trns/               Terminal translator. Interactive REPL + one-shot
                             mode, talks to Google's free endpoint. Pure
                             stdlib, no API key, no pip deps. Linux / macOS /

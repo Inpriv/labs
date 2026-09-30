@@ -30,6 +30,31 @@ const EXPERIMENTS = [
       "Authorized use only. Deauthentication against networks you do not own " +
       "or have explicit written permission to test is illegal in most jurisdictions.",
   },
+  {
+    slug: "drop",
+    name: "drop",
+    tagline: "What would hurt you if this folder, laptop or backup leaked?",
+    repo: "https://github.com/Inpriv/labs/tree/main/tools/drop",
+    docs: "https://github.com/Inpriv/labs/blob/main/tools/drop/README.md",
+    status: "experimental",
+    description:
+      "Local, offline scanner for files on your own machine that could leak " +
+      "sensitive data: .env files, SSH keys, cloud and API tokens, wallet seed " +
+      "phrases, secrets in shell history, loose permissions, unencrypted PII " +
+      "(Luhn / IBAN / PESEL validated) and GPS or author metadata in photos and " +
+      "documents. Prints a redacted report with fixes and a 0-100 exposure " +
+      "score; JSON output and exit codes make it CI- and pre-commit-friendly.",
+    install: [
+      "git clone https://github.com/Inpriv/labs.git",
+      "cd labs/tools/drop",
+      "python3 drop.py scan --home",
+    ],
+    requirements: ["Python 3.8+", "No pip dependencies", "Linux / macOS / Termux / Windows"],
+    legal:
+      "Read-only and fully offline: drop never modifies, uploads or transmits " +
+      "anything, and never prints a secret in full. Scan only machines and " +
+      "files you own or are authorized to audit.",
+  },
 ];
 
 function escape(s) {
